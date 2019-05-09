@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CarService.Bll.Client.MakeAppointment
+namespace CarService.Bll.MakeAppointment
 {
     public class OpeningHandler
     {

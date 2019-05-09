@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CarService.Dal.Entities;
 
-namespace CarService.Bll.Client.MakeAppointment
+namespace CarService.Bll.MakeAppointment
 {
     public class WorkerHandler
     {

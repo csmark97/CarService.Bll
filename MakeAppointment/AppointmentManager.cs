@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CarService.Bll.Client.MakeAppointment
+namespace CarService.Bll.MakeAppointment
 {
     public class AppointmentManager
     {
@@ -22,7 +22,7 @@ namespace CarService.Bll.Client.MakeAppointment
 
         public static async Task<SubTask> GetSubTaskAsync(int id)
         {
-            return await _context.SubTasks.FirstOrDefaultAsync(s => s.Id == id);
+            return await _context.SubTasks.Where(s => s.Id == id).FirstOrDefaultAsync();
         }
 
         public static IDictionary<DayOfWeek, OpeningDay> GetOpening(Opening opening)
@@ -108,6 +108,8 @@ namespace CarService.Bll.Client.MakeAppointment
             WorkerUser workerForTheJob = WorkerHandler.GetWorkerForTheJob(workerUsers, appointment);           
 
             int? openServiceId = ServiceExists(carId);
+
+            subTask = await _context.SubTasks.Where(w => w.Id == subTask.Id).FirstOrDefaultAsync();
 
             Service service;
             if (!openServiceId.HasValue)

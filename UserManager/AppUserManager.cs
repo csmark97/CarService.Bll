@@ -9,18 +9,16 @@ namespace CarService.Bll.User
 {
     public class AppUserManager
     {
-        private CarServiceDbContext _context;
+        private static CarServiceDbContext _context;
 
         private const string _nameIdentifierString = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier";
-
-        public ClaimsPrincipal User { get; set; }
 
         public AppUserManager(CarServiceDbContext context)
         {
             _context = context;
         }              
 
-        public async Task<ClientUser> GetUserAsync()
+        public static async Task<ClientUser> GetUserAsync(ClaimsPrincipal User)
         {
             var userId = User.Claims.Single(c => c.Type == _nameIdentifierString).Value;
             return await _context.ClientUsers.FirstOrDefaultAsync(u => u.Id == userId);
