@@ -4,24 +4,26 @@ using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Security.Claims;
+using CarService.Dal.Manager;
 
-namespace CarService.Bll.User
+namespace CarService.Bll.Users
 {
-    public class AppUserManager
+    public class UserLogic
     {
-        private static CarServiceDbContext _context;
 
         private const string _nameIdentifierString = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier";
 
-        public AppUserManager(CarServiceDbContext context)
+        private readonly ApplicationUserManager _applicationUserManager;
+
+        public UserLogic(CarServiceDbContext context)
         {
-            _context = context;
+            _applicationUserManager = new ApplicationUserManager(context);
         }              
 
         public static async Task<ClientUser> GetUserAsync(ClaimsPrincipal User)
         {
             var userId = User.Claims.Single(c => c.Type == _nameIdentifierString).Value;
-            return await _context.ClientUsers.FirstOrDefaultAsync(u => u.Id == userId);
+            return await ApplicationUserManager.GetUserAsync(userId);
         }
     }
 }

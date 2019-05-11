@@ -8,21 +8,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CarService.Dal.Manager;
+using System.Linq.Expressions;
 
 namespace CarService.Bll.MakeAppointment
 {
-    public class AppointmentManager
+    public class AppointmentLogic
     {
-        private static CarServiceDbContext _context;
+        private static ApplicationEntityManager _applicationEntityManager;
 
-        public AppointmentManager(CarServiceDbContext context)
+        public AppointmentLogic(CarServiceDbContext context)
         {
-            _context = context;
+            _applicationEntityManager = new ApplicationEntityManager(context);
         }
 
-        public static async Task<SubTask> GetSubTaskAsync(int id)
+        public static async Task<SubTask> GetSubTaskByIdAsync(int id)
         {
-            return await _context.SubTasks.Where(s => s.Id == id).FirstOrDefaultAsync();
+            return await ApplicationEntityManager.GetSubTaskByIdAsync(id);
         }
 
         public static IDictionary<DayOfWeek, OpeningDay> GetOpening(Opening opening)
@@ -30,16 +32,12 @@ namespace CarService.Bll.MakeAppointment
             return OpeningHandler.GetOpening(opening);
         }
 
-        public static IList<SelectListItem> GetCarsAsync(ClientUser clientUser)
+        public static async Task<IList<SelectListItem>> GetCarsByIdAsync(string userId)
         {
-            throw new NotImplementedException();
-        }
-
-        public static async Task<IList<SelectListItem>> GetCarsAsync(string userId)
-        {
-            IList<Car> cars = await _context.Cars.Where(w => w.ClientUserId == userId).ToListAsync();
+            IList<Car> cars = await ApplicationEntityManager.GetCarsByUserIdAsync(userId);
 
             IList<SelectListItem> selectListOfCars = new List<SelectListItem>();
+
             foreach (var car in cars)
             {
                 SelectListItem carItem = new SelectListItem
@@ -71,22 +69,15 @@ namespace CarService.Bll.MakeAppointment
 
         private static int? ServiceExists(int carId)
         {
-            bool carHasService = _context.Services.Any(e => e.Id == carId);
+            bool carHasService = ApplicationEntityManager.CarHasService(carId);
 
             if (carHasService)
             {
-                var services = _context.Services
-                    .Where(e => e.Id == carId)
-                    .Select(w => new
-                    {
-                        w.Id,
-                        works = w.Works
-                    })
-                    .ToList();
+                IList<Service> services = ApplicationEntityManager.GetServicesByCarId(carId);
 
                 foreach (var service in services)
                 {
-                    foreach (var work in service.works)
+                    foreach (var work in service.Works)
                     {
                         if (!work.State.Equals("Finished"))
                         {
@@ -101,7 +92,7 @@ namespace CarService.Bll.MakeAppointment
 
         public static async Task MakeAppointmentAsync(DateTime appointment, int carId, SubTask subTask)
         {
-            IList<WorkerUser> workerUsers = await _context.WorkerUsers.ToArrayAsync();
+            IList<WorkerUser> workerUsers = await ApplicationEntityManager.GetWorkerUsersAsync();
 
             workerUsers.Shuffle();
 
@@ -109,7 +100,7 @@ namespace CarService.Bll.MakeAppointment
 
             int? openServiceId = ServiceExists(carId);
 
-            subTask = await _context.SubTasks.Where(w => w.Id == subTask.Id).FirstOrDefaultAsync();
+            subTask = await ApplicationEntityManager.GetSubTaskByIdAsync(subTask.Id);
 
             Service service;
             if (!openServiceId.HasValue)
@@ -122,12 +113,12 @@ namespace CarService.Bll.MakeAppointment
                     CarId = carId
                 };
 
-                _context.Services.Add(service);
-                await _context.SaveChangesAsync();
+                await ApplicationEntityManager.SaveServiceAsync(service);
             }
             else
             {
-                service = await _context.Services.Where(w => w.Id == openServiceId.Value).FirstOrDefaultAsync();
+                service = await ApplicationEntityManager.GetServcieByIdAsync(openServiceId.Value);
+
                 service.TotalPrice += subTask.EstimatedPrice;
 
                 if (appointment.AddMinutes(subTask.EstimtedTime) > service.EndTime)
@@ -135,8 +126,7 @@ namespace CarService.Bll.MakeAppointment
                     service.EndTime = appointment.AddMinutes(subTask.EstimtedTime);
                 }
 
-                _context.Services.Add(service);
-                _context.Attach(service).State = EntityState.Modified;
+                ApplicationEntityManager.ModifyService(service);
             }
 
             Work work = new Work
@@ -150,8 +140,7 @@ namespace CarService.Bll.MakeAppointment
                 WorkerUserId = workerForTheJob.Id
             };
 
-            _context.Works.Add(work);
-            await _context.SaveChangesAsync();
+            await ApplicationEntityManager.SaveWorkAsync(work);
         }
     }
 }
