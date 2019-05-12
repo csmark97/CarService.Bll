@@ -79,7 +79,7 @@ namespace CarService.Bll.MakeAppointment
                 {
                     foreach (var work in service.Works)
                     {
-                        if (!work.State.Equals("Finished"))
+                        if (!work.State.Equals("Finished") || !work.State.Equals("FinishedAndPaid"))
                         {
                             return service.Id;
                         }
@@ -119,14 +119,34 @@ namespace CarService.Bll.MakeAppointment
             {
                 service = await ApplicationEntityManager.GetServcieByIdAsync(openServiceId.Value);
 
-                service.TotalPrice += subTask.EstimatedPrice;
-
-                if (appointment.AddMinutes(subTask.EstimtedTime) > service.EndTime)
+                if (service.Works.ElementAt(0).SubTask.CompanyUserId == subTask.CompanyUserId)
                 {
-                    service.EndTime = appointment.AddMinutes(subTask.EstimtedTime);
-                }
+                    service.TotalPrice = 0;
+                    foreach (var w in service.Works)
+                    {
+                        service.TotalPrice += w.Price;
+                    }
+                    service.TotalPrice += subTask.EstimatedPrice;
 
-                ApplicationEntityManager.ModifyService(service);
+                    if (appointment.AddMinutes(subTask.EstimtedTime) > service.EndTime)
+                    {
+                        service.EndTime = appointment.AddMinutes(subTask.EstimtedTime);
+                    }
+
+                    ApplicationEntityManager.ModifyService(service);
+                }
+                else
+                {
+                    service = new Service
+                    {
+                        StartingTime = appointment,
+                        EndTime = appointment.AddMinutes(subTask.EstimtedTime),
+                        TotalPrice = subTask.EstimatedPrice,
+                        CarId = carId
+                    };
+
+                    await ApplicationEntityManager.SaveServiceAsync(service);
+                }               
             }
 
             Work work = new Work
