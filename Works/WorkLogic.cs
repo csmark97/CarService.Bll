@@ -19,9 +19,9 @@ namespace CarService.Bll.Works
             _applicationEntityManager = new ApplicationEntityManager(context);
         }
 
-        public static async Task<IList<Work>> GetWorkByServiceIdAsync(int id)
+        public static async Task<IList<Work>> GetWorksByServiceIdAsync(int serviceId)
         {
-            return await ApplicationEntityManager.GetWorkByServiceIdAsync(id);
+            return await ApplicationEntityManager.GetWorkByServiceIdAsync(serviceId);
         }
 
     }

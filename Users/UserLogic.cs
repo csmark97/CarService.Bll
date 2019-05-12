@@ -25,5 +25,11 @@ namespace CarService.Bll.Users
             var userId = User.Claims.Single(c => c.Type == _nameIdentifierString).Value;
             return await ApplicationUserManager.GetUserAsync(userId);
         }
+
+        public static async Task<WorkerUser> GetWorkerUserAsync(ClaimsPrincipal User)
+        {
+            var userId = User.Claims.Single(c => c.Type == _nameIdentifierString).Value;
+            return await ApplicationUserManager.GetWorkerUserAsync(userId);
+        }
     }
 }

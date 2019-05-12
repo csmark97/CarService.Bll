@@ -21,7 +21,7 @@ namespace CarService.Bll.Works
 
         public static async Task<IList<Service>> GetMyServices(string id)
         { 
-            return await ApplicationEntityManager.GetServcieByUserIdAsync(id);
+            return await ApplicationEntityManager.GetServiceByUserIdAsync(id);
         }
     }
 }
