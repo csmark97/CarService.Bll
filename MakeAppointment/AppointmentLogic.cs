@@ -79,7 +79,7 @@ namespace CarService.Bll.MakeAppointment
                 {
                     foreach (var work in service.Works)
                     {
-                        if (!work.State.Equals("Finished") || !work.State.Equals("FinishedAndPaid"))
+                        if (!work.State.Name.Equals("Finished") && !work.State.Name.Equals("FinishedAndPaid"))
                         {
                             return service.Id;
                         }
