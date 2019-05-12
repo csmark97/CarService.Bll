@@ -19,9 +19,65 @@ namespace CarService.Bll.Works
             _applicationEntityManager = new ApplicationEntityManager(context);
         }
 
-        public static async Task<IList<Service>> GetMyServices(string id)
+        public static async Task<IList<Service>> GetMyServicesAsync(string id)
         { 
-            return await ApplicationEntityManager.GetServiceByUserIdAsync(id);
+             return await ApplicationEntityManager.GetServiceByUserIdAsync(id);            
+        }
+
+        public static IList<Service> GetMyActiveServices(IList<Service> services)
+        {
+            List<Service> activeServices = new List<Service>();
+            foreach (var service in services)
+            {
+                foreach (var work in service.Works)
+                {
+                    if (!work.State.Equals("Finished") || !work.State.Equals("FinishedAndPaid"))
+                    {
+                        activeServices.Add(service);
+                        break;
+                    }
+                }
+            }
+
+            return activeServices;
+        }
+
+        public static IList<Service> GetMyFinishedServices(IList<Service> services, IList<Service> activeServices)
+        {
+            IList<Service> finishedServices = new List<Service>();
+
+            foreach (var service in services)
+            {
+                bool serviceIsActive = false;
+                foreach (var activeService in activeServices)
+                {
+                    if (service.Id == activeService.Id)
+                    {
+                        serviceIsActive = true;
+                    }
+                }
+
+                if (!serviceIsActive)
+                {
+                    finishedServices.Add(service);
+                }
+            }
+
+            return finishedServices;
+        }
+
+        public static IDictionary<Work, Service> GetFullServiceHistory(IList<Service> services)
+        {
+            IDictionary<Work, Service> history = new Dictionary<Work, Service>();
+            foreach (var service in services)
+            {
+                foreach (var work in service.Works)
+                {
+                    
+                    history.Add(work, service);
+                }
+            }
+            return history;
         }
     }
 }
