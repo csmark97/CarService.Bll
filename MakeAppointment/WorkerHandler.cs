@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using CarService.Dal;
 using CarService.Dal.Entities;
+using CarService.Dal.Manager;
 
 namespace CarService.Bll.MakeAppointment
 {
@@ -40,6 +43,6 @@ namespace CarService.Bll.MakeAppointment
             }
 
             return workerForTheJob;
-        }
+        }       
     }
 }

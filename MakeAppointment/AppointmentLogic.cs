@@ -67,13 +67,13 @@ namespace CarService.Bll.MakeAppointment
             return appointment;
         }
 
-        private static int? ServiceExists(int carId)
+        private static async Task<int?> ServiceExistsAsync(int carId)
         {
             bool carHasService = ApplicationEntityManager.CarHasService(carId);
 
             if (carHasService)
             {
-                IList<Service> services = ApplicationEntityManager.GetServicesByCarId(carId);
+                IList<Service> services = await ApplicationEntityManager.GetServicesByCarIdAsync(carId);
 
                 foreach (var service in services)
                 {
@@ -90,17 +90,25 @@ namespace CarService.Bll.MakeAppointment
             return null;
         }
 
+        public static async Task<IDictionary<DayOfWeek, Dictionary<DateTime, bool>>> GetOpening2Async(Opening opening, string companyId)
+        {
+            IList<WorkerUser> workerUsers;
+            workerUsers = await ApplicationEntityManager.GetWorkerUsersByCompanyIdAsync(companyId);
+
+            return OpeningHandler.GetOpening2(workerUsers,opening);
+        }
+
         public static async Task MakeAppointmentAsync(DateTime appointment, int carId, SubTask subTask)
         {
-            IList<WorkerUser> workerUsers = await ApplicationEntityManager.GetWorkerUsersAsync();
+            subTask = await ApplicationEntityManager.GetSubTaskByIdAsync(subTask.Id);
+
+            IList<WorkerUser> workerUsers = await ApplicationEntityManager.GetWorkerUsersByCompanyIdAsync(subTask.CompanyUserId);
 
             workerUsers.Shuffle();
 
-            WorkerUser workerForTheJob = WorkerHandler.GetWorkerForTheJob(workerUsers, appointment);           
+            WorkerUser workerForTheJob = WorkerHandler.GetWorkerForTheJob(workerUsers, appointment);
 
-            int? openServiceId = ServiceExists(carId);
-
-            subTask = await ApplicationEntityManager.GetSubTaskByIdAsync(subTask.Id);
+            int? openServiceId = await ServiceExistsAsync(carId);
 
             Service service;
             if (!openServiceId.HasValue)
@@ -146,7 +154,7 @@ namespace CarService.Bll.MakeAppointment
                     };
 
                     await ApplicationEntityManager.SaveServiceAsync(service);
-                }               
+                }
             }
 
             Work work = new Work
