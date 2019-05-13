@@ -10,7 +10,7 @@ namespace CarService.Bll.MakeAppointment
 {
     public class WorkerHandler
     {
-        public static WorkerUser GetWorkerForTheJob(IList<WorkerUser> workerUsers, DateTime appointment)
+        public static WorkerUser GetWorkerForTheJob(IList<WorkerUser> workerUsers, DateTime appointmentStart, DateTime appointmentEnd)
         {
             WorkerUser workerForTheJob = new WorkerUser();
 
@@ -25,7 +25,8 @@ namespace CarService.Bll.MakeAppointment
 
                 foreach (var interval in workingTimes)
                 {
-                    if (appointment >= interval.StartingTime && appointment < interval.EndTime)
+                    if (appointmentStart >= interval.StartingTime && appointmentStart < interval.EndTime
+                            || appointmentEnd > interval.StartingTime && appointmentEnd <= interval.EndTime)
                     {
                         thisWorkerIsFree = false;
                     }
@@ -38,7 +39,7 @@ namespace CarService.Bll.MakeAppointment
                 }
                 else
                 {
-                    throw new Exception("Erre az időpontra, nincs szabad munkatársunk!");
+                    return null;
                 }
             }
 

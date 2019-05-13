@@ -90,12 +90,12 @@ namespace CarService.Bll.MakeAppointment
             return null;
         }
 
-        public static async Task<IDictionary<DayOfWeek, Dictionary<DateTime, bool>>> GetOpening2Async(Opening opening, string companyId)
+        public static async Task<IDictionary<DayOfWeek, Dictionary<DateTime, bool>>> GetOpening2Async(SubTask subTask)
         {
             IList<WorkerUser> workerUsers;
-            workerUsers = await ApplicationEntityManager.GetWorkerUsersByCompanyIdAsync(companyId);
+            workerUsers = await ApplicationEntityManager.GetWorkerUsersByCompanyIdAsync(subTask.CompanyUserId);
 
-            return OpeningHandler.GetOpening2(workerUsers,opening);
+            return OpeningHandler.GetOpening2(workerUsers, subTask);
         }
 
         public static async Task MakeAppointmentAsync(DateTime appointment, int carId, SubTask subTask)
@@ -106,7 +106,7 @@ namespace CarService.Bll.MakeAppointment
 
             workerUsers.Shuffle();
 
-            WorkerUser workerForTheJob = WorkerHandler.GetWorkerForTheJob(workerUsers, appointment);
+            WorkerUser workerForTheJob = WorkerHandler.GetWorkerForTheJob(workerUsers, appointment, appointment.AddMinutes(subTask.EstimtedTime));
 
             int? openServiceId = await ServiceExistsAsync(carId);
 
