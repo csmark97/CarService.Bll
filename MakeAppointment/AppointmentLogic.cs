@@ -90,12 +90,12 @@ namespace CarService.Bll.MakeAppointment
             return null;
         }
 
-        public static async Task<IDictionary<DayOfWeek, Dictionary<DateTime, bool>>> GetOpening2Async(SubTask subTask)
+        public static async Task<IDictionary<DayOfWeek, Dictionary<DateTime, bool>>> GetFinalOpeningAsync(SubTask subTask)
         {
             IList<WorkerUser> workerUsers;
             workerUsers = await ApplicationEntityManager.GetWorkerUsersByCompanyIdAsync(subTask.CompanyUserId);
 
-            return OpeningHandler.GetOpening2(workerUsers, subTask);
+            return OpeningHandler.GetFinalOpening(workerUsers, subTask);
         }
 
         public static async Task MakeAppointmentAsync(DateTime appointment, int carId, SubTask subTask)
@@ -135,6 +135,11 @@ namespace CarService.Bll.MakeAppointment
                         service.TotalPrice += w.Price;
                     }
                     service.TotalPrice += subTask.EstimatedPrice;
+
+                    if (appointment < service.StartingTime)
+                    {
+                        service.StartingTime = appointment;
+                    }
 
                     if (appointment.AddMinutes(subTask.EstimtedTime) > service.EndTime)
                     {

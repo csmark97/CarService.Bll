@@ -24,7 +24,7 @@ namespace CarService.Bll.MakeAppointment
             return Opening;
         }
 
-        internal static IDictionary<DayOfWeek, Dictionary<DateTime, bool>> GetOpening2(IList<WorkerUser> workerUsers, SubTask subTask)
+        internal static IDictionary<DayOfWeek, Dictionary<DateTime, bool>> GetFinalOpening(IList<WorkerUser> workerUsers, SubTask subTask)
         {
             IDictionary<DayOfWeek, Dictionary<DateTime, bool>> finalOpening = new Dictionary<DayOfWeek, Dictionary<DateTime, bool>>();
             Dictionary<DayOfWeek, OpeningDay> Openings = new Dictionary<DayOfWeek, OpeningDay>();
