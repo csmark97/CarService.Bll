@@ -10,6 +10,8 @@ using System.Text;
 using System.Threading.Tasks;
 using CarService.Dal.Manager;
 using System.Linq.Expressions;
+using CarService.Bll.EmailService;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace CarService.Bll.MakeAppointment
 {
@@ -98,7 +100,7 @@ namespace CarService.Bll.MakeAppointment
             return OpeningHandler.GetFinalOpening(workerUsers, subTask);
         }
 
-        public static async Task MakeAppointmentAsync(DateTime appointment, int carId, SubTask subTask)
+        public static async Task<Work> MakeAppointmentAsync(DateTime appointment, int carId, SubTask subTask)
         {
             subTask = await ApplicationEntityManager.GetSubTaskByIdAsync(subTask.Id);
 
@@ -174,6 +176,8 @@ namespace CarService.Bll.MakeAppointment
             };
 
             await ApplicationEntityManager.SaveWorkAsync(work);
+
+            return work;
         }
     }
 }
