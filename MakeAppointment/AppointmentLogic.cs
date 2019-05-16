@@ -100,7 +100,7 @@ namespace CarService.Bll.MakeAppointment
             return OpeningHandler.GetFinalOpening(workerUsers, subTask);
         }
 
-        public static async Task<Work> MakeAppointmentAsync(DateTime appointment, int carId, SubTask subTask)
+        public static async Task<Work> MakeAppointmentAsync(DateTime appointment, int carId, SubTask subTask, string description)
         {
             subTask = await ApplicationEntityManager.GetSubTaskByIdAsync(subTask.Id);
 
@@ -111,6 +111,8 @@ namespace CarService.Bll.MakeAppointment
             WorkerUser workerForTheJob = WorkerHandler.GetWorkerForTheJob(workerUsers, appointment, appointment.AddMinutes(subTask.EstimtedTime));
 
             int? openServiceId = await ServiceExistsAsync(carId);
+
+            Car car = await ApplicationEntityManager.GetCarByIdAsync(carId);
 
             Service service;
             if (!openServiceId.HasValue)
@@ -162,7 +164,7 @@ namespace CarService.Bll.MakeAppointment
 
                     await ApplicationEntityManager.SaveServiceAsync(service);
                 }
-            }
+            }            
 
             Work work = new Work
             {
@@ -176,6 +178,16 @@ namespace CarService.Bll.MakeAppointment
             };
 
             await ApplicationEntityManager.SaveWorkAsync(work);
+
+            Message message = new Message
+            {
+                SenderId = car.ClientUserId,
+                Text = description,
+                WorkId = work.Id,
+                Time = DateTime.Now
+            };
+
+            await ApplicationEntityManager.SaveMessageAsync(message);
 
             return work;
         }

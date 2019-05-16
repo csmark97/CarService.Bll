@@ -40,19 +40,31 @@ namespace CarService.Bll.EmailService
                     $"tartozó {workDeatils} munka állapota megváltozott!<br /><br />Új állapot: {state}" +
                     $"<br /><br /><br />Ez azt jelenti, hogy önnek be kell lépnie felületünkre és elfogadni valamilyen módosítást, " +
                     $"amely legtöbbször a munka árára vonatkozik. Erről pontosabb tájékoztatás a felületen a " +
-                    $"munkához tartozó üzenetek között talál.");
+                    $"munkához tartozó üzenetek között talál.<br /><br />" +
+                    $"Üdvözlettel,<br />{work.SubTask.Name}");
             }
             else if (work.StateId == 2)
             {
                 message = ($"Tisztelt {clientName}!<br /><br />{car} autójához " +
-                    $"tartozó {workDeatils} munkát rögzítettük!<br /><br />Állapot: {state}");
+                    $"tartozó {workDeatils} munkát rögzítettük!<br /><br />Állapot: {state}.<br /><br />" +
+                    $"Üdvözlettel,<br />{work.SubTask.Name}");
             }
             else
             {
                 message = ($"Tisztelt {clientName}!<br /><br />{car} autójához " +
-                    $"tartozó {workDeatils} munka állapota megváltozott!<br /><br />Új állapot: {state}");
+                    $"tartozó {workDeatils} munka állapota megváltozott!<br /><br />Új állapot: {state}.<br /><br />" +
+                    $"Üdvözlettel,<br />{work.SubTask.Name}");
             }
 
+
+            await _emailSender.SendEmailAsync(email, subject, message);
+        }
+
+        public async Task SendNotificationAsync(Work work, string message)
+        {
+            var email = work.Service.Car.ClientUser.Email;           
+
+            var subject = "Értesítés - noreply";            
 
             await _emailSender.SendEmailAsync(email, subject, message);
         }

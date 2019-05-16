@@ -21,8 +21,17 @@ namespace CarService.Bll.Works
 
         public static async Task<IList<Work>> GetWorksByServiceIdAsync(int serviceId)
         {
-            return await ApplicationEntityManager.GetWorkByServiceIdAsync(serviceId);
+            return await ApplicationEntityManager.GetWorksByServiceIdAsync(serviceId);
         }
 
+        public static async Task<Work> GetWorkByIdAsync(int id)
+        {
+            return await ApplicationEntityManager.GetWorkByIdAsync(id);
+        }
+
+        public static async Task SaveMessageAsync(Message message)
+        {
+            await ApplicationEntityManager.SaveMessageAsync(message);
+        }
     }
 }
