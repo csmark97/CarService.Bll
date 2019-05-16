@@ -60,6 +60,16 @@ namespace CarService.Bll.EmailService
             await _emailSender.SendEmailAsync(email, subject, message);
         }
 
+        public async Task SendStatusChangeEmailAsync(Service service)
+        {
+            var email = service.Car.ClientUser.Email;
+            var subject = "Szervíz fizetve - noreply";
+            var message = $"Tisztelt {service.Car.ClientUser.Name}!<br /><br />" +
+                $"Értesítjük, hogy a szervíz fizetve lett!";
+
+            await _emailSender.SendEmailAsync(email, subject, message);
+        }
+
         public async Task SendNotificationAsync(Work work, string message)
         {
             var email = work.Service.Car.ClientUser.Email;           
